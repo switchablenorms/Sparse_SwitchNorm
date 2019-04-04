@@ -80,8 +80,8 @@ If you find this work helpful in your project or use our model zoo, please consi
 ```
 @inproceedings{shao2018ssn, 
   title={SSN: Learning Sparse Switchable Normalization via SparsestMax}, 
-  author={Shao, Wenqi and Meng, Tianjian and Li Jingyu and Zhang Ruimao and
-  Li Yudian and Wang, Xiaogang and Luo, Ping}, 
+  author={Shao, Wenqi and Meng, Tianjian and Li, Jingyu and Zhang, Ruimao and
+  Li, Yudian and Wang, Xiaogang and Luo, Ping}, 
   booktitle={CVPR}, 
   year={2019} 
 }
