@@ -18,48 +18,12 @@ and GN in different batch size settings. The bracket (·, ·) denotes (#GPUs,#sa
 “GN-BN” indicates the difference between the accuracies of GN and BN.
 
 
-<table border="1px" align="center" bordercolor="black">
-    <tr align="center">
-        <td>Normalizer</td>
-        <td>(8,32)</td>
-        <td>(8,16)</td>
-        <td>(8,8)</td>
-        <td>(8,4)</td>
-        <td>(8,2)</td>
-    </tr>
-    <tr align="center">
-        <td>BN</td>
-        <td>76.4</td>
-        <td>76.3</td>
-        <td>75.5</td>
-        <td>72.7</td>        
-        <td>65.3</td>
-    </tr>
-        <tr align="center">
-        <td>GN</td>
-        <td>75.9</td>
-        <td>75.8</td>
-        <td>76.0</td>
-        <td>75.8</td>        
-        <td><strong>75.9</strong></td>
-    </tr>
-        <tr align="center">
-        <td>SN</td>
-        <td>76.9</td>
-        <td>76.7</td>
-        <td>76.7</td>
-        <td>75.9</td>        
-        <td>75.6</td>
-    </tr>
-        <tr align="center">
-        <td>SSN</td>
-        <td><strong>77.2</strong></td>
-        <td><strong>77.0</strong></td>
-        <td><strong>76.8</strong></td>
-        <td><strong>76.1</strong></td>        
-        <td><strong>75.9</strong></td>
-    </tr>
-</table>
+| Normalizer | (8,32) | (8,16) | (8,8) | (8,4) | (8,2) |    
+| :----:  | :--: | :--:  | :--:  | :--:  | :--:  |  
+| BN | 76.4 | 76.3 | 75.5 | 72.7 | 65.3 |    
+| GN | 75.9 | 75.8 | 76.0 | 75.8 | <strong>75.9</strong> |   
+| SN | 76.9 | 76.7 | 76.7 | 75.9 | 75.6 |   
+| SSN | <strong>77.2</strong> | <strong>77.0</strong> | <strong>76.8</strong> | <strong>76.1</strong>| <strong>75.9</strong> |   
 
 
 ## Getting Started
