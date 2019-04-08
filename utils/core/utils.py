@@ -15,6 +15,34 @@ def save_checkpoint(model_dir, state, is_best):
         shutil.copyfile(path, os.path.join(model_dir, 'model-best.pth'))
 
 
+def match_ckpt_key(model, checkpoint):
+    ckpt_keys = list(checkpoint['state_dict'].keys())
+    own_keys = list(model.state_dict().keys())
+    if own_keys[0].startswith('module.'):
+        print('Model keys start with module.')
+        if ckpt_keys[0].startswith('module.'):
+            load_ckpt = checkpoint['state_dict']
+        else:
+            ori_ckpt = checkpoint['state_dict']
+            load_ckpt = {}
+            for k in ori_ckpt:
+                w = ori_ckpt[k]
+                new_k = 'module.' + k
+                load_ckpt[new_k] = w
+    else:
+        print('Model keys do not start with module.')
+        if ckpt_keys[0].startswith('module.'):
+            ori_ckpt = checkpoint['state_dict']
+            load_ckpt = {}
+            for k in ori_ckpt:
+                w = ori_ckpt[k]
+                new_k = k.replace('module.', '')
+                load_ckpt[new_k] = w
+        else:
+            load_ckpt = checkpoint['state_dict']
+    return load_ckpt
+
+
 def load_state(model_dir, model, optimizer=None):
     if not os.path.exists(model_dir + '/checkpoint'):
         print("=> no checkpoint found at '{}', train from scratch".format(model_dir))
@@ -22,7 +50,7 @@ def load_state(model_dir, model, optimizer=None):
     else:
         ckpt = open(model_dir + '/checkpoint')
         model_path = ckpt.readlines()[0].split(':')[1].strip('\n')
-        checkpoint = torch.load(model_path,map_location='cuda:{}'.format(torch.cuda.current_device()))
+        checkpoint = torch.load(model_path, map_location='cuda:{}'.format(torch.cuda.current_device()))
         model.load_state_dict(checkpoint['state_dict'], strict=False)
         ckpt_keys = set(checkpoint['state_dict'].keys())
         own_keys = set(model.state_dict().keys())
@@ -44,8 +72,7 @@ def load_state(model_dir, model, optimizer=None):
 
 def load_state_epoch(model_dir, model, epoch):
     model_path = model_dir + '/model.pth-' + str(epoch)
-    checkpoint = torch.load(model_path,map_location='cuda:{}'.format(torch.cuda.current_device()))
-
+    checkpoint = torch.load(model_path, map_location='cuda:{}'.format(torch.cuda.current_device()))
     model.load_state_dict(checkpoint['state_dict'], strict=False)
     ckpt_keys = set(checkpoint['state_dict'].keys())
     own_keys = set(model.state_dict().keys())
@@ -58,9 +85,12 @@ def load_state_epoch(model_dir, model, epoch):
 
 def load_state_ckpt(model_path, model):
     checkpoint = torch.load(model_path, map_location='cuda:{}'.format(torch.cuda.current_device()))
-    model.load_state_dict(checkpoint['state_dict'], strict=False)
-    ckpt_keys = set(checkpoint['state_dict'].keys())
+    # check whether start with 'module.'
+    load_ckpt = match_ckpt_key(model, checkpoint)
+    model.load_state_dict(load_ckpt, strict=False)
+    ckpt_keys = set(load_ckpt.keys())
     own_keys = set(model.state_dict().keys())
+
     missing_keys = own_keys - ckpt_keys
     for k in missing_keys:
         print('missing keys from checkpoint {}: {}'.format(model_path, k))

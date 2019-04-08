@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--config', default='configs/config_resnetv1sn50.yaml')
 parser.add_argument("--local_rank", type=int)
 parser.add_argument("--batch_size", type=int, default=None)
+parser.add_argument("--print_freq", type=int, default=None)
 parser.add_argument("--workers", type=int, default=None)
 parser.add_argument('--port', default=29500, type=int, help='port of server')
 parser.add_argument('--world-size', default=1, type=int)
@@ -48,17 +49,10 @@ def main():
             elif args.__dict__[k] is None:
                 setattr(args, k, v)
 
-    print('Enabled distributed training.')
-
-    rank, world_size = 0, 1
-    args.rank = rank
-    args.world_size = world_size
-
-    if rank == 0:
-        print('################################')
-        print('Parameters')
-        print(args)
-        print('################################')
+    print('################################')
+    print('Parameters')
+    print(args)
+    print('################################')
 
     # create model
     print("=> creating model '{}'".format(args.model))
@@ -70,14 +64,12 @@ def main():
                                             last_gamma=args.last_gamma)
 
     model.cuda()
+    model = nn.DataParallel(model)
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
-
     load_state_ckpt(args.checkpoint_path, model)
-
     cudnn.benchmark = True
-
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -107,8 +99,6 @@ def validate(val_loader, model, criterion):
 
     # switch to evaluate mode
     model.eval()
-    world_size = args.world_size
-    rank = args.rank
     results = []
     results_label = []
 
@@ -121,7 +111,7 @@ def validate(val_loader, model, criterion):
 
             # compute output
             output = model(input_var)
-            loss = criterion(output, target_var) / world_size
+            loss = criterion(output, target_var)
 
             if args.save_result:
                 logit_w = output.data.cpu().numpy()
@@ -142,7 +132,7 @@ def validate(val_loader, model, criterion):
             batch_time.update(time.time() - end)
             end = time.time()
 
-            if i % args.print_freq == 0 and rank == 0:
+            if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Loss {loss.val:.4f} ({loss.avg:.4f})\t'

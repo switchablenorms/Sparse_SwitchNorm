@@ -40,7 +40,7 @@ and GN in different batch size settings. The bracket (·, ·) denotes (#GPUs,#sa
   - pyyaml
 
 ### Data Preparation
-- Download the ImageNet dataset and put them into the `{repo_root}/imagenet/data/imagenet`.
+- Download the ImageNet dataset and put them into the `{repo_root}/data/imagenet`.
 
 ### Training a model from scratch
 This part will be released later.
@@ -58,7 +58,7 @@ Or you can specify the checkpoint path by modifying test.sh
 
 ## Model Zoo
 
-We provide models pretrained with SSN on ImageNet. The configuration of SN is denoted as (#GPUs, #images per GPU).
+We provide models pretrained with SSN on ImageNet. The configuration of SSN is denoted as (#GPUs, #images per GPU).
 
 | Model | Top-1<sup>*</sup> | Top-5<sup>*</sup> | Download | MD5 |  
 | :----:  | :--: | :--:  | :--:  | :--:  |  
