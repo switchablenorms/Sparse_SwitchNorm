@@ -4,26 +4,31 @@ from math import sin, sqrt, acos
 import torch
 
 
-def regulated_sparsemax(v, rad=0, z=1):
-    v_sorted, ind_sorted = torch.sort(v, dim=0, descending=True)
+def sparsemax(v, z=1):
+    v_sorted, _ = torch.sort(v, dim=0, descending=True)
     cssv = torch.cumsum(v_sorted, dim=0) - z
     ind = torch.arange(1, 1 + len(v)).float().to(v.device)
     cond = v_sorted - cssv / ind > 0
     rho = ind.masked_select(cond)[-1]
     tau = cssv.masked_select(cond)[-1] / rho
     w = torch.clamp(v - tau, min=0)
+    return w / z
 
-    u = torch.tensor(1/3).to(v.device)
-    distance = torch.sum((w-u)**2)**(1/2)
+def sparsestmax(v, rad_in=0, u_in=None):
+    w = sparsemax(v)
+    if max(w) - min(w) == 1:
+        return w
+    ind = torch.tensor(w>0).float()
+    u = ind / torch.sum(ind)
+    if u_in is None:
+        u_in = 1 / len(w)
+        rad = rad_in
+    else:
+        rad = sqrt(rad_in**2 - torch.sum((u-u_in)**2))
+    distance = torch.norm(w-u)
     if distance >= rad:
         return w
-    if distance < 1e-6:
-        distance = distance.detach()
-    p = rad*(w-u)/(distance+1e-6)+u
-
-    if p[ind_sorted[2]] < 0:
-        p[ind_sorted[0]] = (1+sqrt(2)*rad*sin(acos(1/(sqrt(6)*rad))))/2
-        p[ind_sorted[1]] = (1-sqrt(2)*rad*sin(acos(1/(sqrt(6)*rad))))/2
-        p[ind_sorted[2]] = 0
-    p.clamp_(min=0, max=1)
-    return p
+    p = rad*(w-u)/distance+u
+    if min(p) < 0:
+        return sparsestmax(p, rad, u)
+    return p.clamp_(min=0, max=1)

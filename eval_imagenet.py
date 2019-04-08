@@ -66,7 +66,7 @@ def main():
         model = models.__dict__[args.model](using_moving_average=args.using_moving_average, using_bn=args.using_bn,
                                             last_gamma=args.last_gamma)
     else:
-        model = models.__dict__[args.model](using_moving_average=args.using_moving_average, using_bn=args.using_bn,
+        model = models.__dict__[args.model](using_moving_average=args.using_moving_average,
                                             last_gamma=args.last_gamma)
 
     model.cuda()

@@ -17,14 +17,13 @@ def conv3x3(in_planes, out_planes, stride=1):
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, using_moving_average=True, using_bn=True,
-                 last_gamma=True):
+    def __init__(self, inplanes, planes, stride=1, downsample=None, using_moving_average=True, last_gamma=True):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
-        self.sn1 = SSN2d(planes, using_moving_average=using_moving_average, using_bn=using_bn)
+        self.sn1 = SSN2d(planes, using_moving_average=using_moving_average)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes, planes)
-        self.sn2 = SSN2d(planes, using_moving_average=using_moving_average, using_bn=using_bn, last_gamma=last_gamma)
+        self.sn2 = SSN2d(planes, using_moving_average=using_moving_average, last_gamma=last_gamma)
         self.downsample = downsample
         self.stride = stride
 
@@ -50,17 +49,15 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, using_moving_average=True, using_bn=True,
-                 last_gamma=True):
+    def __init__(self, inplanes, planes, stride=1, downsample=None, using_moving_average=True, last_gamma=True):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
-        self.sn1 = SSN2d(planes, using_moving_average=using_moving_average, using_bn=using_bn)
+        self.sn1 = SSN2d(planes, using_moving_average=using_moving_average)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
                                padding=1, bias=False)
-        self.sn2 = SSN2d(planes, using_moving_average=using_moving_average, using_bn=using_bn)
+        self.sn2 = SSN2d(planes, using_moving_average=using_moving_average)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
-        self.sn3 = SSN2d(planes * 4, using_moving_average=using_moving_average, using_bn=using_bn,
-                         last_gamma=last_gamma)
+        self.sn3 = SSN2d(planes * 4, using_moving_average=using_moving_average, last_gamma=last_gamma)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -90,15 +87,14 @@ class Bottleneck(nn.Module):
 
 class ResNetV1SSN(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, using_moving_average=True, using_bn=True, last_gamma=True):
+    def __init__(self, block, layers, num_classes=1000, using_moving_average=True, last_gamma=True):
         self.inplanes = 64
         self.using_moving_average = using_moving_average
-        self.using_bn = using_bn
         self.last_gamma = last_gamma
         super(ResNetV1SSN, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
-        self.sn1 = SSN2d(64, using_moving_average=self.using_moving_average, using_bn=self.using_bn)
+        self.sn1 = SSN2d(64, using_moving_average=self.using_moving_average)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=0, ceil_mode=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -121,17 +117,16 @@ class ResNetV1SSN(nn.Module):
             downsample = nn.Sequential(
                 nn.Conv2d(self.inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
-                SSN2d(planes * block.expansion, using_moving_average=self.using_moving_average,
-                      using_bn=self.using_bn),
+                SSN2d(planes * block.expansion, using_moving_average=self.using_moving_average),
             )
 
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample, using_moving_average=self.using_moving_average,
-                            using_bn=self.using_bn, last_gamma=self.last_gamma))
+                            last_gamma=self.last_gamma))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes, using_moving_average=self.using_moving_average,
-                                using_bn=self.using_bn, last_gamma=self.last_gamma))
+                                last_gamma=self.last_gamma))
 
         return nn.Sequential(*layers)
 

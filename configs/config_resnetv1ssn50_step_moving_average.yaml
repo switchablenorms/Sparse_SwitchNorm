@@ -14,7 +14,6 @@ TRAIN:
 
     using_moving_average : True
     last_gamma : True
-    using_bn: True
 
     print_freq: 100
     model_dir: checkpoint/resnetv1ssn50_step_moving_average
