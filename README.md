@@ -13,9 +13,8 @@ Sparse Switchable Normalization is able to learn only one normalization operatio
 deep neural network in an end-to-end manner.
 <div align=center><img src="SSN.png" width="420" height="350"></div>
 
-**Comparisons of top-1 accuracies** on the validation set of ImageNet, by using ResNet50 trained with SN, BN, 
-and GN in different batch size settings. The bracket (·, ·) denotes (#GPUs,#samples per GPU). In the bottom part, 
-“GN-BN” indicates the difference between the accuracies of GN and BN.
+**Comparisons of top-1 accuracies** on the validation set of ImageNet, by using ResNet50 trained with SSN, SN, BN, 
+and GN in different batch size settings. The bracket (·, ·) denotes (#GPUs,#samples per GPU).
 
 
 | Normalizer | (8,32) | (8,16) | (8,8) | (8,4) | (8,2) |    
