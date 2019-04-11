@@ -23,7 +23,7 @@ from utils import sparse_switchable_norm as ssn
 
 parser = argparse.ArgumentParser(
     description='Pytorch Imagenet Training')
-parser.add_argument('--config', default='configs/config_resnetv1ssn50.yaml')
+parser.add_argument('--config', default='configs/config_resnetv1ssn50_step_moving_average.yaml')
 parser.add_argument("--local_rank", type=int)
 parser.add_argument('--port', default=29500, type=int, help='port of server')
 parser.add_argument('--world-size', default=1, type=int)
@@ -218,10 +218,8 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, writer
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-        lr_scheduler.update(i, epoch)
-        target = target.cuda(async=True)
-        input_var = torch.autograd.Variable(input.cuda())
-        target_var = torch.autograd.Variable(target)
+        input = input.cuda()
+        target = target.cuda()
 
         # update radius for SSN
         if args.model.lower().find('ssn') >= 0:
@@ -232,8 +230,8 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, writer
                     module.set_rad(rad)
 
         # compute output
-        output = model(input_var)
-        loss = criterion(output, target_var) / world_size
+        output = model(input)
+        loss = criterion(output, target) / world_size
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output, target, topk=(1, 5))
@@ -295,8 +293,8 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, writer
                         var = module.get_var().detach()
                         rad_ = module.get_rad()
                         for j in range(3):
-                            writer.add_scalar('Train/%s/mean%s' % (name, n[j]), mean[j].item(), niter)
-                            writer.add_scalar('Train/%s/var%s' % (name, n[j]), var[j].item(), niter)
+                            writer.add_scalar('%s/train/mean%s' % (name, n[j]), mean[j].item(), niter)
+                            writer.add_scalar('%s/train/var%s' % (name, n[j]), var[j].item(), niter)
                 writer.add_scalar('Train/radius', rad_, niter)
 
 
@@ -316,13 +314,12 @@ def validate(val_loader, model, criterion, epoch, writer):
     with torch.no_grad():
         end = time.time()
         for i, (input, target) in enumerate(val_loader):
-            target = target.cuda(async=True)
-            input_var = torch.autograd.Variable(input.cuda())
-            target_var = torch.autograd.Variable(target)
+            input = input.cuda()
+            target = target.cuda()
 
             # compute output
-            output = model(input_var)
-            loss = criterion(output, target_var) / world_size
+            output = model(input)
+            loss = criterion(output, target) / world_size
 
             # measure accuracy and record loss
             prec1, prec5 = accuracy(output, target, topk=(1, 5))
@@ -368,8 +365,8 @@ def validate(val_loader, model, criterion, epoch, writer):
                         var = module.get_var().detach()
                         rad = module.get_rad()
                         for j in range(3):
-                            writer.add_scalar('Eval/%s/mean%s' % (name, n[j]), mean[j].item(), niter)
-                            writer.add_scalar('Eval/%s/var%s' % (name, n[j]), var[j].item(), niter)
+                            writer.add_scalar('%s/eval/mean%s' % (name, n[j]), mean[j].item(), niter)
+                            writer.add_scalar('%s/eval/var%s' % (name, n[j]), var[j].item(), niter)
                 writer.add_scalar('Eval/radius', rad, niter)
 
     return top1.avg
