@@ -43,7 +43,7 @@ def match_ckpt_key(model, checkpoint):
     return load_ckpt
 
 
-def load_state(model_dir, model, optimizer=None):
+def load_state(model_dir, model, optimizer=None, lr_scheduler=None):
     if not os.path.exists(model_dir + '/checkpoint'):
         print("=> no checkpoint found at '{}', train from scratch".format(model_dir))
         return 0, 0
@@ -65,6 +65,7 @@ def load_state(model_dir, model, optimizer=None):
                 best_prec1 = checkpoint['best_prec1']
             start_epoch = checkpoint['epoch']
             optimizer.load_state_dict(checkpoint['optimizer'])
+            lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             print("=> also loaded optimizer from checkpoint '{}' (epoch {})"
                   .format(model_dir, start_epoch))
             return best_prec1, start_epoch
