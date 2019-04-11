@@ -1,6 +1,6 @@
 from __future__ import division
 
-from math import sin, sqrt, acos
+from math import sqrt
 import torch
 
 
@@ -14,21 +14,21 @@ def sparsemax(v, z=1):
     w = torch.clamp(v - tau, min=0)
     return w / z
 
+
 def sparsestmax(v, rad_in=0, u_in=None):
     w = sparsemax(v)
     if max(w) - min(w) == 1:
         return w
-    ind = torch.tensor(w>0).float()
+    ind = torch.tensor(w > 0).float()
     u = ind / torch.sum(ind)
     if u_in is None:
-        u_in = 1 / len(w)
         rad = rad_in
     else:
-        rad = sqrt(rad_in**2 - torch.sum((u-u_in)**2))
-    distance = torch.norm(w-u)
+        rad = sqrt(rad_in ** 2 - torch.sum((u - u_in) ** 2))
+    distance = torch.norm(w - u)
     if distance >= rad:
         return w
-    p = rad*(w-u)/distance+u
+    p = rad * (w - u) / distance + u
     if min(p) < 0:
         return sparsestmax(p, rad, u)
     return p.clamp_(min=0, max=1)
