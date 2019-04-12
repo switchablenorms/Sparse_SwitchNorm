@@ -43,7 +43,10 @@ and GN in different batch size settings. The bracket (·, ·) denotes (#GPUs,#sa
 - Download the ImageNet dataset and put them into the `{repo_root}/data/imagenet`.
 
 ### Training a model from scratch
-This part will be released later.
+```
+./train.sh
+```
+Number of GPUs and configuration file to use can be modified in train.sh
 
 ### Evaluating performance of a model
 Download the pretrained models from Model Zoo and put them into the `{repo_root}/model_zoo`
