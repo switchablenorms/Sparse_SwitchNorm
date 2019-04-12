@@ -7,7 +7,7 @@ TRAIN:
     lr_mode : step
     base_lr: 0.1
     decay_factor : 0.1
-    step : 30,60,90
+    step : [30, 60, 90]
 
     momentum: 0.9
     weight_decay: 0.0001
