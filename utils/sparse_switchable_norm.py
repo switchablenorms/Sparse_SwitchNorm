@@ -12,16 +12,19 @@ class SSN2d(nn.Module):
         self.last_gamma = last_gamma
         self.weight = nn.Parameter(torch.ones(1, num_features, 1, 1))
         self.bias = nn.Parameter(torch.zeros(1, num_features, 1, 1))
-        
+
         self.mean_weight = nn.Parameter(torch.ones(3))
         self.var_weight = nn.Parameter(torch.ones(3))
         self.register_buffer('running_mean', torch.zeros(1, num_features, 1))
         self.register_buffer('running_var', torch.zeros(1, num_features, 1))
 
-        self.rad = 0.
+        # self.rad = 0.
         self.register_buffer('mean_fixed', torch.LongTensor([0]))
         self.register_buffer('var_fixed', torch.LongTensor([0]))
         self.register_buffer('radius', torch.zeros(1))
+
+        self.mean_weight_ = torch.cuda.FloatTensor([1.,1.,1.])
+        self.var_weight_ = torch.cuda.FloatTensor([1.,1.,1.])
 
         self.reset_parameters()
 
@@ -67,8 +70,9 @@ class SSN2d(nn.Module):
             mean_bn = torch.autograd.Variable(self.running_mean)
             var_bn = torch.autograd.Variable(self.running_var)
 
+        rad = self.radius.item()
         if not self.mean_fixed:
-            self.mean_weight_ = sparsestmax(self.mean_weight, self.rad)
+            self.mean_weight_ = sparsestmax(self.mean_weight, rad)
             if max(self.mean_weight_) - min(self.mean_weight_) >= 1:
                 self.mean_fixed.data.fill_(1)
                 self.mean_weight.data = self.mean_weight_.data
@@ -77,7 +81,7 @@ class SSN2d(nn.Module):
             self.mean_weight_ = self.mean_weight.detach()
 
         if not self.var_fixed:
-            self.var_weight_ = sparsestmax(self.var_weight, self.rad)
+            self.var_weight_ = sparsestmax(self.var_weight, rad)
             if max(self.var_weight_) - min(self.var_weight_) >= 1:
                 self.var_fixed.data.fill_(1)
                 self.var_weight.data = self.var_weight_.data
@@ -100,7 +104,7 @@ class SSN2d(nn.Module):
 
     def set_rad(self, rad):
         self.radius[0].fill_(rad)
-        self.rad = torch.squeeze(self.radius)
+        # self.rad = torch.squeeze(self.radius)
 
     def get_rad(self):
         return torch.squeeze(self.radius)

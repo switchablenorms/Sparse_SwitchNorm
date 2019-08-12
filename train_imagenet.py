@@ -24,6 +24,8 @@ from utils import sparse_switchable_norm as ssn
 parser = argparse.ArgumentParser(
     description='Pytorch Imagenet Training')
 parser.add_argument('--config', default='configs/config_resnetv1ssn50_step_moving_average.yaml')
+parser.add_argument("--print_freq", type=int, default=None)
+parser.add_argument("--workers", type=int, default=None)
 parser.add_argument("--local_rank", type=int)
 parser.add_argument('--port', default=29500, type=int, help='port of server')
 parser.add_argument('--world-size', default=1, type=int)
